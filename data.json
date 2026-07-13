@@ -5,11 +5,5 @@
     "bio": "Android & Full-Stack Web Developer specialized in high-performance native utilities and responsive cloud architectures."
   },
   "androidApps": [],
-  "webApps": [
-    {
-      "title": "Analytical Creator Dashboard",
-      "desc": "Full-stack web application wrapper monitoring channel performance metrics, formatting video views, and generating trends.",
-      "liveUrl": "https://render.com"
-    }
-  ]
+  "webApps": []
 }
