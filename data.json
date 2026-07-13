@@ -20,6 +20,14 @@
       "stack": "Kotlin",
       "repoUrl": "https://github.com/SFrehman/Playora",
       "apkUrl": "https://store-na-phx-1.gofile.io/download/web/7c43ea0a-c5d4-42d9-84cd-22bdab227629/Playora.apk"
+    },
+    {
+      "title": "SmartGPA",
+      "version": "v1.0.0",
+      "desc": "A GPA/CGPA Calculator app",
+      "stack": "Kotlin",
+      "repoUrl": "#",
+      "apkUrl": "https://apkpure.com/smartgpa/com.janitech01.smartgpa"
     }
   ],
   "webApps": [
@@ -36,7 +44,7 @@
     {
       "title": "HelloChat",
       "desc": "Online Chat app Created using MernStack",
-      "liveUrl": "."
+      "liveUrl": "#"
     }
   ]
 }
