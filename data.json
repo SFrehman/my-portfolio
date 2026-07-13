@@ -32,6 +32,11 @@
       "title": "SkyBrg",
       "desc": "An Online file sharing site between devices",
       "liveUrl": "https://skybrg.lovable.app/"
+    },
+    {
+      "title": "HelloChat",
+      "desc": "Online Chat app Created using MernStack",
+      "liveUrl": "."
     }
   ]
 }
