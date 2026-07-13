@@ -14,5 +14,11 @@
       "apkUrl": "https://store3.gofile.io/download/web/67c079d2-348c-4889-b6bb-db375f6c1afd/ResumeGen.apk"
     }
   ],
-  "webApps": []
+  "webApps": [
+    {
+      "title": "Youtube",
+      "desc": "...",
+      "liveUrl": "Youtube.com"
+    }
+  ]
 }
