@@ -151,7 +151,7 @@
                     <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 relative">
                         <button onclick="removeAndroidApp(${i})" class="absolute top-4 right-4 text-slate-500 hover:text-red-400 transition text-sm cursor-pointer"><i class="fas fa-trash-can"></i></button>
                         
-                        <!-- ANONYMOUS APKS UPLOADER INJECTOR -->
+                        <!-- ANONYMOUS APKS UPLOADER INJECTOR WITH TRACKER -->
                         <div class="bg-slate-900 border border-slate-800 p-3 rounded-lg flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
                             <div>
                                 <span class="font-bold text-emerald-400 block"><i class="fas fa-mask"></i> Private Cloud Storage Bypass</span>
@@ -173,46 +173,65 @@
                         <div class="grid grid-cols-3 gap-2 text-xs">
                             <div><label class="text-slate-500 block mb-1">Tech Framework</label><input type="text" value="${app.stack||''}" oninput="portfolioData.androidApps[${i}].stack=this.value" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-slate-200"></div>
                             <div><label class="text-slate-500 block mb-1">Source Code URL</label><input type="text" value="${app.repoUrl||''}" oninput="portfolioData.androidApps[${i}].repoUrl=this.value" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-slate-200"></div>
-                            <div><label class="text-slate-500 block mb-1">Encrypted APK Endpoint Link</label><input type="text" id="apk-url-${i}" value="${app.apkUrl||''}" oninput="portfolioData.androidApps[${i}].apkUrl=this.value" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-emerald-400 font-mono text-[10px]" readonly placeholder="Generated automatically on file drop..."></div>
+                            <div>
+                                <label class="text-slate-500 block mb-1">APK Download URL</label>
+                                <input type="text" id="apk-url-${i}" value="${app.apkUrl||''}" oninput="portfolioData.androidApps[${i}].apkUrl=this.value" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-emerald-400 font-mono text-[10px]" placeholder="Generated automatically or paste custom mirror link...">
+                            </div>
                         </div>
                     </div>`;
             });
         }
 
-        async function uploadFileAnonymously(index) {
+        function uploadFileAnonymously(index) {
             const picker = document.getElementById(`file-picker-${index}`);
             const label = document.getElementById(`upload-label-${index}`);
-            if(!picker.files || picker.files.length === 0) return;
+            if (!picker.files || picker.files.length === 0) return;
 
             const file = picker.files[0];
-            label.innerHTML = `<i class="fas fa-spinner animate-spin"></i> Encrypting & Encapsulating...`;
             label.style.pointerEvents = "none";
+            label.className = "bg-amber-500 text-slate-950 font-bold px-3 py-1.5 rounded text-[11px] block text-center";
 
-            // Using file.io secure anonymous temporal service pipeline 
             const formData = new FormData();
             formData.append('file', file);
 
-            try {
-                const response = await fetch('https://file.io/?expires=1y', {
-                    method: 'POST',
-                    body: formData
-                });
-                const result = await response.json();
-                
-                if(result.success) {
-                    portfolioData.androidApps[index].apkUrl = result.link;
-                    document.getElementById(`apk-url-${index}`).value = result.link;
-                    label.innerHTML = `<i class="fas fa-check text-slate-950"></i> Upload Complete`;
-                    label.className = "bg-teal-400 text-slate-950 font-bold px-3 py-1.5 rounded text-[11px]";
-                    alert("File securely hosted outside of GitHub layers. Remember to tap Deploy Updates to push changes live!");
-                } else {
-                    throw new Error("Target service declined payload format.");
+            const xhr = new XMLHttpRequest();
+            
+            // Real-time Upload Progress monitoring loop
+            xhr.upload.addEventListener('progress', (e) => {
+                if (e.lengthComputable) {
+                    const percentComplete = Math.round((e.loaded / e.total) * 100);
+                    label.innerHTML = `<i class="fas fa-spinner animate-spin mr-1"></i> Uploading: ${percentComplete}%`;
                 }
-            } catch(err) {
-                alert("Upload failed. Try a smaller build or clear your connection lines.");
-                label.innerHTML = `<i class="fas fa-triangle-exclamation"></i> Retry Upload`;
-                label.style.pointerEvents = "auto";
-            }
+            });
+
+            xhr.addEventListener('load', () => {
+                try {
+                    const result = JSON.parse(xhr.responseText);
+                    if (xhr.status >= 200 && xhr.status < 300 && result.success) {
+                        portfolioData.androidApps[index].apkUrl = result.link;
+                        document.getElementById(`apk-url-${index}`).value = result.link;
+                        label.innerHTML = `<i class="fas fa-check"></i> Complete`;
+                        label.className = "bg-teal-400 text-slate-950 font-bold px-3 py-1.5 rounded text-[11px] block text-center";
+                        alert("File uploaded successfully to safe external host! Click 'Deploy Updates' to make it live.");
+                    } else {
+                        throw new Error("Target pipeline rejected format processing.");
+                    }
+                } catch (err) {
+                    handleUploadError(label);
+                }
+            });
+
+            xhr.addEventListener('error', () => handleUploadError(label));
+            
+            xhr.open('POST', 'https://file.io/?expires=1y');
+            xhr.send(formData);
+        }
+
+        function handleUploadError(label) {
+            alert("Upload timed out or encountered speed degradation. For large APKs, please paste a direct download link manually.");
+            label.innerHTML = `<i class="fas fa-triangle-exclamation mr-1"></i> Retry Upload`;
+            label.className = "bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-1.5 rounded text-[11px] block text-center";
+            label.style.pointerEvents = "auto";
         }
 
         function renderWebCards() {
