@@ -4,6 +4,15 @@
     "pic": "profile.jpg",
     "bio": "Android & Full-Stack Web Developer specialized in high-performance native utilities and responsive cloud architectures."
   },
-  "androidApps": [],
+  "androidApps": [
+    {
+      "title": "New Mobile App",
+      "version": "v1.0.0",
+      "desc": "",
+      "stack": "Kotlin",
+      "repoUrl": "https://github.com/SFrehman/Resumegen",
+      "apkUrl": "https://store3.gofile.io/download/web/67c079d2-348c-4889-b6bb-db375f6c1afd/ResumeGen.apk"
+    }
+  ],
   "webApps": []
 }
