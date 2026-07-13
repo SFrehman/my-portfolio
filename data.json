@@ -8,7 +8,7 @@
     {
       "title": "ResumeGen",
       "version": "v1.0.0",
-      "desc": "",
+      "desc": "A Resume Generator app ",
       "stack": "Kotlin",
       "repoUrl": "https://github.com/SFrehman/Resumegen",
       "apkUrl": "https://store3.gofile.io/download/web/67c079d2-348c-4889-b6bb-db375f6c1afd/ResumeGen.apk"
