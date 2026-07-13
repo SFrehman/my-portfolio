@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Console | Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased">
+
+    <!-- CONNECTION SYSTEM GATEWAY MODAL -->
+    <div id="auth-overlay" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
+            <div class="flex items-center gap-3 border-b border-slate-800 pb-3">
+                <i class="fas fa-sliders text-emerald-400 text-xl"></i>
+                <h2 class="text-xl font-bold text-white">Console Authentication</h2>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">Enter your GitHub Personal Access Token and repository info. Your token is safely stored only in your local browser storage.</p>
+            <div class="space-y-3 pt-2 text-sm">
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 mb-1">GitHub Token (PAT)</label>
+                    <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-emerald-500 font-mono text-xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 mb-1">GitHub Username</label>
+                    <input type="text" id="gh-user" placeholder="e.g., janicreator" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-emerald-500 text-xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 mb-1">Repository Name</label>
+                    <input type="text" id="gh-repo" placeholder="e.g., jani-portfolio" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-emerald-500 text-xs">
+                </div>
+            </div>
+            <button onclick="initializeAdmin()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold py-2.5 rounded-lg transition mt-4 text-sm cursor-pointer">Establish Secure Connection</button>
+        </div>
+    </div>
+
+    <!-- MAIN CONSOLE INTERFACE -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <span class="mono text-emerald-400 font-bold text-sm">jani.dev/_admin</span>
+                <span class="text-[10px] uppercase font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded">Connected</span>
+            </div>
+            <button onclick="saveAllToGitHub()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg transition shadow-md flex items-center gap-1.5 cursor-pointer">
+                <i class="fas fa-cloud-arrow-up"></i> Deploy Updates
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 py-10 grid md:grid-cols-3 gap-8">
+        <!-- META CONTROLS -->
+        <div class="space-y-6">
+            <div class="bg-slate-900/50 border border-slate-900 rounded-xl p-5 space-y-4">
+                <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2 flex items-center gap-2"><i class="fas fa-user-gear text-slate-400"></i> Profile Details</h3>
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Display Title Name</label>
+                        <input type="text" id="prof-name" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Profile Photo Path</label>
+                        <input type="text" id="prof-pic" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Bio / Profile Info Summary</label>
+                        <textarea id="prof-bio" rows="5" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-emerald-500 resize-none"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- APP LISTS CONTROLS -->
+        <div class="md:col-span-2 space-y-8">
+            <div class="bg-slate-900/50 border border-slate-900 rounded-xl p-5 space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fab fa-android text-emerald-400"></i> Android Application Matrix</h3>
+                    <button onclick="addAndroidAppCard()" class="text-xs bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 px-2.5 py-1 rounded-md transition cursor-pointer"><i class="fas fa-plus mr-1"></i> Add Mobile Build</button>
+                </div>
+                <div id="android-list" class="space-y-4"></div>
+            </div>
+
+            <div class="bg-slate-900/50 border border-slate-900 rounded-xl p-5 space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-server text-indigo-400"></i> Dynamic Web Services</h3>
+                    <button onclick="addWebAppCard()" class="text-xs bg-slate-800 hover:bg-slate-700 text-indigo-400 border border-slate-700 px-2.5 py-1 rounded-md transition cursor-pointer"><i class="fas fa-plus mr-1"></i> Add Web App</button>
+                </div>
+                <div id="web-list" class="space-y-3"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let portfolioData = { profile: { name: "", pic: "", bio: "" }, androidApps: [], webApps: [] };
+        let ghConfig = { token: "", user: "", repo: "", sha: "" };
+
+        // Automatically pull values from local browser memory if you logged in before
+        window.addEventListener('DOMContentLoaded', () => {
+            if(localStorage.getItem('gh_user')) {
+                document.getElementById('gh-token').value = localStorage.getItem('gh_token') || '';
+                document.getElementById('gh-user').value = localStorage.getItem('gh_user') || '';
+                document.getElementById('gh-repo').value = localStorage.getItem('gh_repo') || '';
+            }
+        });
+
+        async function initializeAdmin() {
+            ghConfig.token = document.getElementById('gh-token').value.trim();
+            ghConfig.user = document.getElementById('gh-user').value.trim();
+            ghConfig.repo = document.getElementById('gh-repo').value.trim();
+
+            if (!ghConfig.token || !ghConfig.user || !ghConfig.repo) { return alert("Please fill out all token verification fields."); }
+
+            try {
+                const res = await fetch(`https://api.github.com/repos/${ghConfig.user}/${ghConfig.repo}/contents/data.json`, {
+                    headers: { 'Authorization': `token ${ghConfig.token}` }
+                });
+                if (res.status === 404) {
+                    alert("data.json not found. We will create a fresh structure file when you hit deploy.");
+                    document.getElementById('auth-overlay').remove();
+                    return renderUI();
+                }
+                const data = await res.json();
+                ghConfig.sha = data.sha;
+                portfolioData = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+                
+                // Cache info locally for easier future logins
+                localStorage.setItem('gh_token', ghConfig.token);
+                localStorage.setItem('gh_user', ghConfig.user);
+                localStorage.setItem('gh_repo', ghConfig.repo);
+
+                document.getElementById('auth-overlay').remove();
+                renderUI();
+            } catch (err) { alert("GitHub Authentication failed. Verify your settings and token permissions."); }
+        }
+
+        function renderUI() {
+            document.getElementById('prof-name').value = portfolioData.profile.name || "";
+            document.getElementById('prof-pic').value = portfolioData.profile.pic || "";
+            document.getElementById('prof-bio').value = portfolioData.profile.bio || "";
+            renderAndroidCards();
+            renderWebCards();
+        }
+
+        function renderAndroidCards() {
+            const list = document.getElementById('android-list');
+            list.innerHTML = "";
+            (portfolioData.androidApps || []).forEach((app, i) => {
+                list.innerHTML += `
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 relative">
+                        <button onclick="removeAndroidApp(${i})" class="absolute top-4 right-4 text-slate-500 hover:text-red-400 transition text-sm cursor-pointer"><i class="fas fa-trash-can"></i></button>
+                        <div class="grid grid-cols-2 gap-3 text-xs">
+                            <div><label class="text-slate-500 block mb-1">App Name</label><input type="text" value="${app.title||''}" oninput="portfolioData.androidApps[${i}].title=this.value" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-slate-200"></div>
+                            <div><label class="text-slate-500 block mb-1">Version Tag</label><input type="text" value="${app.version||''}" oninput="portfolioData.androidApps[${i}].version=this.value" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-slate-200"></div>
+                        </div>
+                        <div class="text-xs"><label class="text-slate-500 block mb-1">App Description Summary</label><input type="text" value="${app.desc||''}" oninput="portfolioData.androidApps[${i}].desc=this.value" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-slate-200"></div>
+                        <div class="grid grid-cols-3 gap-2 text-xs">
+                            <div><label class="text-slate-500 block mb-1">Tech Framework</label><input type="text" value="${app.stack||''}" oninput="portfolioData.androidApps[${i}].stack=this.value" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-slate-200"></div>
+                            <div><label class="text-slate-500 block mb-1">Source Code URL</label><input type="text" value="${app.repoUrl||''}" oninput="portfolioData.androidApps[${i}].repoUrl=this.value" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-slate-200"></div>
+                            <div><label class="text-slate-500 block mb-1">APK File Link / Path</label><input type="text" value="${app.apkUrl||''}" oninput="portfolioData.androidApps[${i}].apkUrl=this.value" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-slate-200"></div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function renderWebCards() {
+            const list = document.getElementById('web-list');
+            list.innerHTML = "";
+            (portfolioData.webApps || []).forEach((app, i) => {
+                list.innerHTML += `
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-start gap-4 relative">
+                        <button onclick="removeWebApp(${i})" class="absolute top-4 right-4 text-slate-500 hover:text-red-400 transition text-sm cursor-pointer"><i class="fas fa-trash-can"></i></button>
+                        <div class="grid sm:grid-cols-3 gap-3 text-xs w-full pr-6">
+                            <div><label class="text-slate-500 block mb-1">Web Platform Title</label><input type="text" value="${app.title||''}" oninput="portfolioData.webApps[${i}].title=this.value" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-slate-200"></div>
+                            <div><label class="text-slate-500 block mb-1">Short Description</label><input type="text" value="${app.desc||''}" oninput="portfolioData.webApps[${i}].desc=this.value" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-slate-200"></div>
+                            <div><label class="text-slate-500 block mb-1">Deployment URL</label><input type="text" value="${app.liveUrl||''}" oninput="portfolioData.webApps[${i}].liveUrl=this.value" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-slate-200"></div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function addAndroidAppCard() { if(!portfolioData.androidApps) portfolioData.androidApps = []; portfolioData.androidApps.push({ title: "New Mobile App", version: "v1.0.0", desc: "", stack: "Kotlin", repoUrl: "#", apkUrl: "#" }); renderAndroidCards(); }
+        function removeAndroidApp(i) { portfolioData.androidApps.splice(i, 1); renderAndroidCards(); }
+        function addWebAppCard() { if(!portfolioData.webApps) portfolioData.webApps = []; portfolioData.webApps.push({ title: "New Web App", desc: "", liveUrl: "#" }); renderWebCards(); }
+        function removeWebApp(i) { portfolioData.webApps.splice(i, 1); renderWebCards(); }
+
+        async function saveAllToGitHub() {
+            portfolioData.profile.name = document.getElementById('prof-name').value.trim();
+            portfolioData.profile.pic = document.getElementById('prof-pic').value.trim();
+            portfolioData.profile.bio = document.getElementById('prof-bio').value.trim();
+
+            const jsonString = JSON.stringify(portfolioData, null, 2);
+            const base64Content = btoa(unescape(encodeURIComponent(jsonString)));
+
+            const payload = { message: "System metadata update via portfolio management console", content: base64Content };
+            if (ghConfig.sha) payload.sha = ghConfig.sha;
+
+            try {
+                const res = await fetch(`https://api.github.com/repos/${ghConfig.user}/${ghConfig.repo}/contents/data.json`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${ghConfig.token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    const resData = await res.json();
+                    ghConfig.sha = resData.content.sha;
+                    alert("System updated successfully! Your portfolio will update live in a few moments.");
+                } else { alert("Failed to save changes. Double check your repository data rules."); }
+            } catch (err) { alert("Network exception occurred during compilation workflow."); }
+        }
+    </script>
+</body>
+</html>

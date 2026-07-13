@@ -1,0 +1,24 @@
+{
+  "profile": {
+    "name": "Jani",
+    "pic": "profile.jpg",
+    "bio": "Android & Full-Stack Web Developer specialized in high-performance native utilities and responsive cloud architectures."
+  },
+  "androidApps": [
+    {
+      "title": "Pak Train Tracker",
+      "version": "v1.0.4-alpha",
+      "desc": "A local transit solution leveraging public endpoint configurations to fetch real-time train arrivals, tracking route delays, and active scheduling maps.",
+      "stack": "Kotlin, Jetpack Compose, SQLite",
+      "repoUrl": "https://github.com",
+      "apkUrl": "downloads/train-tracker.apk"
+    }
+  ],
+  "webApps": [
+    {
+      "title": "Analytical Creator Dashboard",
+      "desc": "Full-stack web application wrapper monitoring channel performance metrics, formatting video views, and generating trends.",
+      "liveUrl": "https://render.com"
+    }
+  ]
+}
