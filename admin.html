@@ -151,11 +151,11 @@
                     <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 relative">
                         <button onclick="removeAndroidApp(${i})" class="absolute top-4 right-4 text-slate-500 hover:text-red-400 transition text-sm cursor-pointer"><i class="fas fa-trash-can"></i></button>
                         
-                        <!-- ANONYMOUS APKS UPLOADER INJECTOR WITH TRACKER -->
+                        <!-- LARGE PIPELINE APKS UPLOADER -->
                         <div class="bg-slate-900 border border-slate-800 p-3 rounded-lg flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
                             <div>
-                                <span class="font-bold text-emerald-400 block"><i class="fas fa-mask"></i> Private Cloud Storage Bypass</span>
-                                <span class="text-[10px] text-slate-400">Uploads anonymously to external hosting layers. Links stay completely hidden from your repository folder.</span>
+                                <span class="font-bold text-emerald-400 block"><i class="fas fa-mask"></i> Private Large File Bypass (No Size Limit)</span>
+                                <span class="text-[10px] text-slate-400">Uploads anonymously via high-capacity clusters. Kept completely separate from your GitHub folder.</span>
                             </div>
                             <div class="relative shrink-0">
                                 <input type="file" id="file-picker-${i}" accept=".apk" onchange="uploadFileAnonymously(${i})" class="hidden">
@@ -182,7 +182,7 @@
             });
         }
 
-        function uploadFileAnonymously(index) {
+        async function uploadFileAnonymously(index) {
             const picker = document.getElementById(`file-picker-${index}`);
             const label = document.getElementById(`upload-label-${index}`);
             if (!picker.files || picker.files.length === 0) return;
@@ -190,45 +190,61 @@
             const file = picker.files[0];
             label.style.pointerEvents = "none";
             label.className = "bg-amber-500 text-slate-950 font-bold px-3 py-1.5 rounded text-[11px] block text-center";
+            label.innerHTML = `<i class="fas fa-spinner animate-spin mr-1"></i> Contacting Server...`;
 
-            const formData = new FormData();
-            formData.append('file', file);
+            try {
+                // Step 1: Get fastest active server node from GoFile
+                const serverRes = await fetch('https://api.gofile.io/contents/getServer');
+                const serverData = await serverRes.json();
+                
+                if (serverData.status !== 'ok') throw new Error("Could not acquire cluster node.");
+                const uploadUrl = `https://${serverData.data.server}.gofile.io/contents/uploadfile`;
 
-            const xhr = new XMLHttpRequest();
-            
-            // Real-time Upload Progress monitoring loop
-            xhr.upload.addEventListener('progress', (e) => {
-                if (e.lengthComputable) {
-                    const percentComplete = Math.round((e.loaded / e.total) * 100);
-                    label.innerHTML = `<i class="fas fa-spinner animate-spin mr-1"></i> Uploading: ${percentComplete}%`;
-                }
-            });
+                // Step 2: Fire upload stream with native XHR progress indicator
+                const formData = new FormData();
+                formData.append('file', file);
 
-            xhr.addEventListener('load', () => {
-                try {
-                    const result = JSON.parse(xhr.responseText);
-                    if (xhr.status >= 200 && xhr.status < 300 && result.success) {
-                        portfolioData.androidApps[index].apkUrl = result.link;
-                        document.getElementById(`apk-url-${index}`).value = result.link;
-                        label.innerHTML = `<i class="fas fa-check"></i> Complete`;
-                        label.className = "bg-teal-400 text-slate-950 font-bold px-3 py-1.5 rounded text-[11px] block text-center";
-                        alert("File uploaded successfully to safe external host! Click 'Deploy Updates' to make it live.");
-                    } else {
-                        throw new Error("Target pipeline rejected format processing.");
+                const xhr = new XMLHttpRequest();
+                
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percentComplete = Math.round((e.loaded / e.total) * 100);
+                        label.innerHTML = `<i class="fas fa-spinner animate-spin mr-1"></i> Uploading: ${percentComplete}%`;
                     }
-                } catch (err) {
-                    handleUploadError(label);
-                }
-            });
+                });
 
-            xhr.addEventListener('error', () => handleUploadError(label));
-            
-            xhr.open('POST', 'https://file.io/?expires=1y');
-            xhr.send(formData);
+                xhr.addEventListener('load', () => {
+                    try {
+                        const result = JSON.parse(xhr.responseText);
+                        if (xhr.status >= 200 && xhr.status < 300 && result.status === 'ok') {
+                            // Extract raw direct download string map
+                            const directLink = result.data.downloadPage;
+                            portfolioData.androidApps[index].apkUrl = directLink;
+                            document.getElementById(`apk-url-${index}`).value = directLink;
+                            
+                            label.innerHTML = `<i class="fas fa-check"></i> Complete`;
+                            label.className = "bg-teal-400 text-slate-950 font-bold px-3 py-1.5 rounded text-[11px] block text-center";
+                            alert("Large file successfully bypassed and hosted! Tap 'Deploy Updates' to sync changes live.");
+                        } else {
+                            throw new Error("Cluster dropped transmission.");
+                        }
+                    } catch (err) {
+                        handleUploadError(label);
+                    }
+                });
+
+                xhr.addEventListener('error', () => handleUploadError(label));
+                
+                xhr.open('POST', uploadUrl);
+                xhr.send(formData);
+
+            } catch(err) {
+                handleUploadError(label);
+            }
         }
 
         function handleUploadError(label) {
-            alert("Upload timed out or encountered speed degradation. For large APKs, please paste a direct download link manually.");
+            alert("Upload execution failed. The server might be busy, or your local connection dropped. Try again or paste an external link manually.");
             label.innerHTML = `<i class="fas fa-triangle-exclamation mr-1"></i> Retry Upload`;
             label.className = "bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-1.5 rounded text-[11px] block text-center";
             label.style.pointerEvents = "auto";
