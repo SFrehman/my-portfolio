@@ -6,7 +6,7 @@
   },
   "androidApps": [
     {
-      "title": "New Mobile App",
+      "title": "ResumeGen",
       "version": "v1.0.0",
       "desc": "",
       "stack": "Kotlin",
