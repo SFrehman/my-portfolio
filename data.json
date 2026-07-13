@@ -27,6 +27,11 @@
       "title": "My Portfolio",
       "desc": "My Portfolio , created using html,css,js",
       "liveUrl": "https://sfrehman.github.io/my-portfolio/#web"
+    },
+    {
+      "title": "SkyBrg",
+      "desc": "An Online file sharing site between devices",
+      "liveUrl": "https://skybrg.lovable.app/"
     }
   ]
 }
